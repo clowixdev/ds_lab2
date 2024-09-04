@@ -7,17 +7,17 @@
 #define BUFFERLENGTH 400
 #define ALPLENGTH 25
 
-struct Queue* postfix_notation(char* buffer);
+void postfix_notation(char* buffer, struct Queue* California);
 void calculator(struct Queue* q, char* operands, char values[][BUFFERSIZE], int per_amt);
 int check_operands(char* operands, char* buffer);
 
 //Converts an expression in infix notation to postfix one using Dijkstra's algorithm.
-struct Queue* postfix_notation(char* buffer)
+void postfix_notation(char* buffer, struct Queue* California)
 {
     struct Stack Tehas;
     initializeStack(&Tehas);
-    struct Queue California;
-    initializeQueue(&California);
+    //struct Queue California;
+    //initializeQueue(&California);
     char tempstr[BUFFERSIZE];
     Clear(tempstr, BUFFERSIZE);
     for (int i = 0; buffer[i] != '\0'; i++)
@@ -29,9 +29,16 @@ struct Queue* postfix_notation(char* buffer)
             i--;
             if (strlen(tempstr) == 1) //if variables put in queue
             {
-                put(&California, tempstr);
+                put(California, tempstr);
             }
-            else goto operationslogic;//if functions
+            else {
+                while (!isEmptyS(&Tehas) && operation_priority(Tehas.top->data) >= operation_priority(tempstr)) {
+                    char result[BUFFERSIZE] = { 0 };
+                    pop(&Tehas, result);
+                    put(California, result);
+                }
+                push(&Tehas, tempstr);
+            }
             Clear(tempstr, BUFFERSIZE);
         }
         else if (isdigit(buffer[i]))
@@ -39,7 +46,7 @@ struct Queue* postfix_notation(char* buffer)
             int j = 0;
             while (isdigit(buffer[i]) || buffer[i] == '.') tempstr[j++] = buffer[i++];
             i--;
-            put(&California, tempstr);
+            put(California, tempstr);
             Clear(tempstr, BUFFERSIZE);
         }
         else if (buffer[i] == '(')
@@ -55,7 +62,7 @@ struct Queue* postfix_notation(char* buffer)
             while (!isEmptyS(&Tehas) && Tehas.top->data[0] != '(') {
                 char result[BUFFERSIZE] = { 0 };
                 pop(&Tehas, result);
-                put(&California, result);
+                put(California, result);
             }
             if (!isEmptyS(&Tehas)) pop(&Tehas, r);
         }
@@ -63,11 +70,11 @@ struct Queue* postfix_notation(char* buffer)
         {
             tempstr[0] = buffer[i];
             tempstr[1] = '\0';
-        operationslogic://!!! here functions like sqrt sin cos and etc. are added.
+            // operationslogic://!!! here functions like sqrt sin cos and etc. are added.
             while (!isEmptyS(&Tehas) && operation_priority(Tehas.top->data) >= operation_priority(tempstr)) {
                 char result[BUFFERSIZE] = { 0 };
                 pop(&Tehas, result);
-                put(&California, result);
+                put(California, result);
             }
             push(&Tehas, tempstr);
             Clear(tempstr, BUFFERSIZE);
@@ -76,10 +83,11 @@ struct Queue* postfix_notation(char* buffer)
     while (!isEmptyS(&Tehas)) {
         char result[BUFFERSIZE] = { 0 };
         pop(&Tehas, result);
-        put(&California, result);
+        put(California, result);
     }
-    return &California;
+    // return &California;
 }
+
 
 //Doing some operations in postfix notatin in queue with stack
 void calculator(struct Queue* q, char* operands, char values[][BUFFERSIZE], int per_amt)
@@ -102,7 +110,7 @@ void calculator(struct Queue* q, char* operands, char values[][BUFFERSIZE], int 
         {
             int ind = massivesearch(operands, res[0], per_amt);
             if (ind != (-1)) push(&stack, values[ind]);
-            break;}
+            break; }
         case 3:
             calculation(&res, &stack);
             break;
@@ -160,7 +168,9 @@ int main(void)
         values[i][strlen(values[i]) - 1] = '\0';
     }
 
-    struct Queue* q = postfix_notation(buffer);
+    struct Queue* q = (struct Queue*)malloc(sizeof(struct Queue));
+    initializeQueue(q);
+    postfix_notation(buffer, q);
     printf("Expression in postfix notation: ");
     printQueue(q);
     printf("\n");

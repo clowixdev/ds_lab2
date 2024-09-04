@@ -8,4 +8,4 @@ In this calculator you can write any expressions including expressions with vari
 
 Stack and queue are implemented using linked lists and all their logic is written separately from main file
 
-ACCEPTED!
+### ACCEPTED!
